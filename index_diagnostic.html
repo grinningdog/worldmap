@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My World Travel Map</title>
+<link rel="stylesheet" href="jsvectormap/css/jsvectormap.css">
+<style>
+html, body { margin:0; padding:0; width:100%; min-height:100%; font-family:system-ui,-apple-system,sans-serif; background:#f4f7f6; color:#333; }
+header { background:#2c3e50; color:white; min-height:70px; box-sizing:border-box; padding:1rem 2rem; display:flex; justify-content:space-between; align-items:center; }
+header h1 { margin:0; font-size:1.5rem; }
+header a { color:#fff; text-decoration:none; font-weight:bold; }
+#map-container { width:100%; height:calc(100vh - 70px); min-height:450px; background:#e0e7ee; }
+.legend { position:fixed; bottom:20px; left:20px; background:white; padding:15px; border-radius:8px; box-shadow:0 4px 6px rgba(0,0,0,.15); z-index:100; }
+.legend-item { display:flex; align-items:center; margin-bottom:5px; font-size:.9rem; }
+.legend-color { width:20px; height:20px; border-radius:4px; margin-right:10px; border:1px solid #ddd; }
+#message { position:fixed; top:85px; left:50%; transform:translateX(-50%); background:#fff3cd; color:#664d03; padding:10px 15px; border-radius:6px; box-shadow:0 2px 6px rgba(0,0,0,.15); z-index:200; display:none; }
+@media(max-width:768px) {
+ header { min-height:90px; padding:.8rem 1rem; flex-direction:column; gap:.5rem; text-align:center; }
+ header h1 { font-size:1.2rem; }
+ #map-container { height:calc(100vh - 90px); min-height:400px; }
+ .legend { bottom:10px; left:10px; right:10px; padding:10px; display:grid; grid-template-columns:1fr 1fr; gap:5px; }
+ .legend-item { font-size:.75rem; margin:0; }
+ .legend-color { width:15px; height:15px; margin-right:6px; }
+}
+</style>
+</head>
+<body>
+<header><h1>🌍 My World Travel Map</h1><a href="admin.html">Admin Panel</a></header>
+<div id="map-container"></div>
+<div id="message"></div>
+<div class="legend">
+ <div class="legend-item"><div class="legend-color" style="background:#2ECC71"></div>Visited</div>
+ <div class="legend-item"><div class="legend-color" style="background:#2980B9"></div>Priority A</div>
+ <div class="legend-item"><div class="legend-color" style="background:#3498DB"></div>Priority B</div>
+ <div class="legend-item"><div class="legend-color" style="background:#85C1E9"></div>Priority C</div>
+ <div class="legend-item"><div class="legend-color" style="background:#E74C3C"></div>Never Visit</div>
+ <div class="legend-item"><div class="legend-color" style="background:#BDC3C7"></div>Unvisited</div>
+</div>
+
+<script src="jsvectormap/js/jsvectormap.min.js"></script>
+<script src="jsvectormap/maps/world.js"></script>
+<script>
+(function () {
+  const msg = document.getElementById('message');
+
+  function report(text) {
+    msg.textContent = text;
+    msg.style.display = 'block';
+    msg.style.whiteSpace = 'pre-wrap';
+    msg.style.maxWidth = '90%';
+    msg.style.fontFamily = 'monospace';
+  }
+
+  try {
+    if (typeof jsVectorMap === 'undefined') {
+      throw new Error('jsVectorMap is not defined');
+    }
+
+    if (!jsVectorMap.maps || !jsVectorMap.maps.world) {
+      throw new Error('The world map definition was not registered. jsVectorMap.maps.world is missing.');
+    }
+
+    new jsVectorMap({
+      selector: '#map-container',
+      map: 'world',
+      backgroundColor: 'transparent',
+      regionStyle: {
+        initial: {
+          fill: '#BDC3C7',
+          fillOpacity: 1,
+          stroke: '#ffffff',
+          strokeWidth: 0.7
+        },
+        hover: { fillOpacity: 0.85 }
+      }
+    });
+
+    report('SUCCESS: The bare world map loaded.\n\nIf you can see the countries, the library is working and the problem is in the colouring/data code.');
+  } catch (error) {
+    console.error(error);
+    report(
+      'MAP ERROR:\n' +
+      (error && error.stack ? error.stack : String(error))
+    );
+  }
+})();
+</script>
+</body>
+</html>
