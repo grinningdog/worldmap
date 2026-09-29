@@ -43,7 +43,7 @@ function fit(){if(!svg||!worldData)return;const w=container.clientWidth,h=contai
 function applyTransform(){if(group)group.setAttribute('transform',`translate(${tx} ${ty}) scale(${scale})`)}
 function zoom(f,cx=container.clientWidth/2,cy=container.clientHeight/2){const ns=Math.max(.55,Math.min(8,scale*f));const k=ns/scale;tx=cx-k*(cx-tx);ty=cy-k*(cy-ty);scale=ns;applyTransform()}
 function makeMap(){
- svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('viewBox',`0 0 ${worldData.width} ${worldData.height}`);svg.setAttribute('preserveAspectRatio','none');
+ svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('width','100%');svg.setAttribute('height','100%');
  group=document.createElementNS('http://www.w3.org/2000/svg','g');svg.appendChild(group);container.appendChild(svg);
  Object.entries(worldData.paths).forEach(([code,p])=>{const path=document.createElementNS('http://www.w3.org/2000/svg','path');path.setAttribute('d',p.path);path.setAttribute('class','country');path.dataset.code=code;path.dataset.name=p.name||code;path.setAttribute('fill',COLORS[statusFor(code)]||COLORS.default);path.addEventListener('mouseenter',()=>{tooltip.textContent=`${p.name||code} (${code}) — ${STATUS_NAMES[statusFor(code)]||'Unvisited'}`;tooltip.style.display='block'});path.addEventListener('mousemove',e=>{const r=container.getBoundingClientRect();tooltip.style.left=(e.clientX-r.left+12)+'px';tooltip.style.top=(e.clientY-r.top+12)+'px'});path.addEventListener('mouseleave',()=>tooltip.style.display='none');group.appendChild(path)});
  fit();
