@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Travel Map</title>
+    <!-- jsVectorMap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsvectormap/dist/css/jsvectormap.min.css" />
+    <style>
+        body { font-family: system-ui, -apple-system, sans-serif; margin: 0; background: #f4f7f6; color: #333; }
+        header { background: #2c3e50; color: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+        header h1 { margin: 0; font-size: 1.5rem; }
+        header a { color: #3498db; text-decoration: none; font-weight: bold; }
+        
+        #map-container { 
+            width: 100%; 
+            height: calc(100vh - 70px); 
+            background: #e0e7ee; 
+        }
+
+        .legend {
+            position: absolute; bottom: 20px; left: 20px; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); z-index: 1000;
+        }
+        .legend-item { display: flex; align-items: center; margin-bottom: 5px; font-size: 0.9rem; }
+        .legend-color { width: 20px; height: 20px; border-radius: 4px; margin-right: 10px; border: 1px solid #ddd; }
+
+        /* --- MOBILE & TABLET ADJUSTMENTS --- */
+        @media (max-width: 768px) {
+            header { padding: 0.8rem 1rem; flex-direction: column; gap: 0.5rem; text-align: center; }
+            header h1 { font-size: 1.2rem; }
+            
+            /* Make legend smaller and stack it better on small screens */
+            .legend { 
+                bottom: 10px; left: 10px; right: 10px; 
+                padding: 10px; 
+                display: grid; 
+                grid-template-columns: 1fr 1fr; /* 2 columns on mobile */
+                gap: 5px;
+            }
+            .legend-item { font-size: 0.75rem; margin-bottom: 0; }
+            .legend-color { width: 15px; height: 15px; margin-right: 6px; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>🌍 My World Travel Map</h1>
+    <a href="admin.html">Admin Panel</a>
+</header>
+
+<div style="position: relative; height: 100%;">
+    <div id="map-container"></div>
+    
+    <div class="legend">
+        <div class="legend-item"><div class="legend-color" style="background: #2ECC71;"></div> Visited</div>
+        <div class="legend-item"><div class="legend-color" style="background: #2980B9;"></div> Priority A</div>
+        <div class="legend-item"><div class="legend-color" style="background: #3498DB;"></div> Priority B</div>
+        <div class="legend-item"><div class="legend-color" style="background: #85C1E9;"></div> Priority C</div>
+        <div class="legend-item"><div class="legend-color" style="background: #E74C3C;"></div> Never Visit</div>
+        <div class="legend-item"><div class="legend-color" style="background: #BDC3C7;"></div> Unvisited</div>
+    </div>
+</div>
+
+<!-- jsVectorMap JS -->
+<script src="https://cdn.jsdelivr.net/npm/jsvectormap/dist/js/jsvectormap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsvectormap/dist/maps/world.js"></script>
+
+<script>
+    // Color mapping
+    const STATUS_COLORS = {
+        visited: '#2ECC71',
+        priority_a: '#2980B9',
+        priority_b: '#3498DB',
+        priority_c: '#85C1E9',
+        never: '#E74C3C',
+        default: '#BDC3C7'
+    };
+
+    // Initialize Map
+    const map = new jsVectorMap({
+        selector: '#map-container',
+        map: 'world',
+        backgroundColor: 'transparent',
+        regionStyle: {
+            initial: {
+                fill: STATUS_COLORS.default,
+                stroke: '#fff',
+                strokeWidth: 0.5
+            }
+        },
+        regionClick: true,
+        onRegionClick(event, code) {
+            // FUTURE FEATURE: City Highlighting
+            console.log(`Clicked country code: ${code}. Ready for city selection!`);
+            alert(`You clicked ${code}. In the future, this will open a city selector!`);
+        }
+    });
+
+    // Load Data
+    async function loadMapData() {
+        try {
+            // Try to fetch from GitHub repo first
+            const response = await fetch('data.json');
+            if (!response.ok) throw new Error('No data.json found');
+            const data = await response.json();
+            applyColors(data);
+        } catch (error) {
+            // Fallback to localStorage if file isn't found (e.g., local testing)
+            const localData = localStorage.getItem('travelMapData');
+            if (localData) {
+                applyColors(JSON.parse(localData));
+            }
+        }
+    }
+
+    function applyColors(data) {
+        const regionStyle = {};
+        for (const [countryCode, status] of Object.entries(data.countries)) {
+            regionStyle[countryCode] = {
+                initial: { fill: STATUS_COLORS[status] || STATUS_COLORS.default }
+            };
+        }
+        map.updateRegions(regionStyle);
+    }
+
+    loadMapData();
+</script>
+</body>
+</html>

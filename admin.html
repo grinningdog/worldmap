@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Travel Map Admin</title>
+    <style>
+        body { font-family: system-ui, -apple-system, sans-serif; margin: 0; background: #f4f7f6; color: #333; }
+        header { background: #2c3e50; color: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+        header h1 { margin: 0; font-size: 1.5rem; }
+        header a { color: #3498db; text-decoration: none; font-weight: bold; }
+        
+        .container { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
+        
+        .actions { background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 2rem; display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;}
+        button { padding: 0.6rem 1.2rem; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 0.9rem; }
+        .btn-primary { background: #3498db; color: white; }
+        .btn-success { background: #2ECC71; color: white; }
+        .btn-warning { background: #f39c12; color: white; }
+        
+        .search-box { width: 100%; padding: 0.8rem; margin-bottom: 1rem; border: 1px solid #ddd; border-radius: 5px; font-size: 1rem; }
+        
+        /* Table wrapper for mobile scrolling */
+        .table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 0.8rem 1rem; text-align: left; border-bottom: 1px solid #eee; white-space: nowrap; }
+        th { background: #f8f9fa; font-weight: 600; position: sticky; top: 0; }
+        
+        select { 
+            padding: 0.5rem; 
+            border-radius: 4px; 
+            border: 1px solid #ddd; 
+            font-size: 1rem; /* Crucial: 16px prevents iOS Safari from zooming in on focus */
+        }
+        
+        .modal-bg { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
+        .modal { background: white; padding: 2rem; border-radius: 8px; width: 90%; max-width: 600px; max-height: 80vh; display: flex; flex-direction: column; }
+        .modal textarea { flex: 1; width: 100%; font-family: monospace; padding: 1rem; border: 1px solid #ddd; border-radius: 5px; margin: 1rem 0; }
+
+        /* --- MOBILE & TABLET ADJUSTMENTS --- */
+        @media (max-width: 768px) {
+            header { padding: 1rem; flex-direction: column; gap: 0.5rem; text-align: center; }
+            header h1 { font-size: 1.2rem; }
+            
+            .container { margin: 1rem auto; }
+            
+            /* Stack buttons and make them large enough for thumbs */
+            .actions { flex-direction: column; padding: 1rem; }
+            .actions button { width: 100%; min-height: 48px; font-size: 1rem; }
+            
+            /* Ensure table text doesn't wrap awkwardly */
+            table { min-width: 500px; } 
+            th, td { padding: 0.6rem 0.8rem; }
+            
+            /* Make dropdowns tall enough to tap easily */
+            select { min-height: 44px; padding: 0.5rem 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>⚙️ Travel Map Admin</h1>
+    <a href="index.html">View Map</a>
+</header>
+
+<div class="container">
+    <div class="actions">
+        <button class="btn-primary" onclick="saveLocal()">💾 Save to Browser</button>
+        <button class="btn-success" onclick="exportJSON()">📤 Export JSON (For GitHub)</button>
+        <button class="btn-warning" onclick="document.getElementById('importFile').click()">📥 Import JSON</button>
+        <input type="file" id="importFile" style="display:none" accept=".json" onchange="importJSON(event)">
+    </div>
+
+    <input type="text" class="search-box" id="searchInput" onkeyup="filterCountries()" placeholder="Search for a country...">
+
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Country</th>
+                    <th>Code</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="countryList"></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Export Modal -->
+<div class="modal-bg" id="exportModal">
+    <div class="modal">
+        <h2>GitHub JSON Data</h2>
+        <p>Copy this code and save it as <code>data.json</code> in your GitHub repository:</p>
+        <textarea id="jsonOutput" readonly></textarea>
+        <button class="btn-primary" onclick="copyJSON()">Copy to Clipboard</button>
+        <button style="background:#eee; margin-top:0.5rem;" onclick="closeModal()">Close</button>
+    </div>
+</div>
+
+<script>
+    // Standard ISO 3166-1 alpha-2 codes and names
+    const COUNTRIES = {
+        "AF": "Afghanistan", "AL": "Albania", "DZ": "Algeria", "AR": "Argentina", "AU": "Australia", 
+        "AT": "Austria", "BE": "Belgium", "BR": "Brazil", "CA": "Canada", "CN": "China", 
+        "DK": "Denmark", "EG": "Egypt", "FI": "Finland", "FR": "France", "DE": "Germany", 
+        "GR": "Greece", "IN": "India", "ID": "Indonesia", "IE": "Ireland", "IT": "Italy", 
+        "JP": "Japan", "KE": "Kenya", "MX": "Mexico", "NL": "Netherlands", "NG": "Nigeria", 
+        "NO": "Norway", "PK": "Pakistan", "PE": "Peru", "PH": "Philippines", "PL": "Poland", 
+        "PT": "Portugal", "RU": "Russia", "SA": "Saudi Arabia", "ZA": "South Africa", "ES": "Spain", 
+        "SE": "Sweden", "CH": "Switzerland", "TH": "Thailand", "TR": "Turkey", "GB": "United Kingdom", 
+        "US": "United States", "VN": "Vietnam"
+        // Note: Add any missing countries here using their 2-letter ISO codes
+    };
+
+    const STATUS_OPTIONS = [
+        { value: 'default', text: 'Unvisited (Grey)' },
+        { value: 'visited', text: 'Visited (Green)' },
+        { value: 'priority_a', text: 'Priority A (Dark Blue)' },
+        { value: 'priority_b', text: 'Priority B (Medium Blue)' },
+        { value: 'priority_c', text: 'Priority C (Light Blue)' },
+        { value: 'never', text: 'Will Never Visit (Red)' }
+    ];
+
+    let travelData = { countries: {} };
+
+    // Initialize
+    function init() {
+        const saved = localStorage.getItem('travelMapData');
+        if (saved) {
+            travelData = JSON.parse(saved);
+        } else {
+            // Initialize all as default
+            Object.keys(COUNTRIES).forEach(code => travelData.countries[code] = 'default');
+        }
+        renderList();
+    }
+
+    function renderList() {
+        const tbody = document.getElementById('countryList');
+        tbody.innerHTML = '';
+        
+        Object.entries(COUNTRIES).forEach(([code, name]) => {
+            const status = travelData.countries[code] || 'default';
+            const row = document.createElement('tr');
+            row.dataset.name = name.toLowerCase();
+            
+            row.innerHTML = `
+                <td>${name}</td>
+                <td><code>${code}</code></td>
+                <td>
+                    <select onchange="updateStatus('${code}', this.value)">
+                        ${STATUS_OPTIONS.map(opt => 
+                            `<option value="${opt.value}" ${status === opt.value ? 'selected' : ''}>${opt.text}</option>`
+                        ).join('')}
+                    </select>
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
+    }
+
+    function updateStatus(code, value) {
+        travelData.countries[code] = value;
+    }
+
+    function saveLocal() {
+        localStorage.setItem('travelMapData', JSON.stringify(travelData));
+        alert('Saved to browser local storage!');
+    }
+
+    function exportJSON() {
+        const jsonStr = JSON.stringify(travelData, null, 2);
+        document.getElementById('jsonOutput').value = jsonStr;
+        document.getElementById('exportModal').style.display = 'flex';
+    }
+
+    function copyJSON() {
+        const textarea = document.getElementById('jsonOutput');
+        textarea.select();
+        document.execCommand('copy');
+        alert('Copied! Now save this as data.json in your GitHub repo.');
+    }
+
+    function closeModal() {
+        document.getElementById('exportModal').style.display = 'none';
+    }
+
+    function importJSON(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                travelData = JSON.parse(e.target.result);
+                saveLocal();
+                renderList();
+                alert('Data imported successfully!');
+            } catch (err) {
+                alert('Error parsing JSON file.');
+            }
+        };
+        reader.readAsText(file);
+    }
+
+    function filterCountries() {
+        const search = document.getElementById('searchInput').value.toLowerCase();
+        const rows = document.querySelectorAll('#countryList tr');
+        rows.forEach(row => {
+            row.style.display = row.dataset.name.includes(search) ? '' : 'none';
+        });
+    }
+
+    init();
+</script>
+</body>
+</html>
