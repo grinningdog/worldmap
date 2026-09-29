@@ -4,75 +4,243 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>My World Travel Map</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jsvectormap/1.7.0/css/jsvectormap.min.css">
+
+<!-- jsVectorMap 1.7.0 -->
+<link id="jsvectormap-css"
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/jsvectormap@1.7.0/dist/jsvectormap.min.css">
+
 <style>
-html, body { margin:0; padding:0; width:100%; min-height:100%; font-family:system-ui,-apple-system,sans-serif; background:#f4f7f6; color:#333; }
-header { background:#2c3e50; color:white; min-height:70px; box-sizing:border-box; padding:1rem 2rem; display:flex; justify-content:space-between; align-items:center; }
-header h1 { margin:0; font-size:1.5rem; }
-header a { color:#fff; text-decoration:none; font-weight:bold; }
-#map-container { width:100%; height:calc(100vh - 70px); min-height:450px; background:#e0e7ee; }
-.legend { position:fixed; bottom:20px; left:20px; background:white; padding:15px; border-radius:8px; box-shadow:0 4px 6px rgba(0,0,0,.15); z-index:100; }
-.legend-item { display:flex; align-items:center; margin-bottom:5px; font-size:.9rem; }
-.legend-color { width:20px; height:20px; border-radius:4px; margin-right:10px; border:1px solid #ddd; }
-#message { position:fixed; top:85px; left:50%; transform:translateX(-50%); background:#fff3cd; color:#664d03; padding:10px 15px; border-radius:6px; box-shadow:0 2px 6px rgba(0,0,0,.15); z-index:200; display:none; }
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100%;
+  font-family: system-ui, -apple-system, sans-serif;
+  background: #f4f7f6;
+  color: #333;
+}
+
+header {
+  background: #2c3e50;
+  color: white;
+  min-height: 70px;
+  box-sizing: border-box;
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+header a {
+  color: #fff;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+#map-container {
+  width: 100%;
+  height: calc(100vh - 70px);
+  min-height: 450px;
+  background: #e0e7ee;
+}
+
+.legend {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  background: white;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0,0,0,.15);
+  z-index: 100;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+  font-size: .9rem;
+}
+
+.legend-color {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  margin-right: 10px;
+  border: 1px solid #ddd;
+}
+
+#message {
+  position: fixed;
+  top: 85px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #fff3cd;
+  color: #664d03;
+  padding: 10px 15px;
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(0,0,0,.15);
+  z-index: 200;
+  display: none;
+  max-width: 90%;
+  text-align: center;
+}
+
 @media(max-width:768px) {
- header { min-height:90px; padding:.8rem 1rem; flex-direction:column; gap:.5rem; text-align:center; }
- header h1 { font-size:1.2rem; }
- #map-container { height:calc(100vh - 90px); min-height:400px; }
- .legend { bottom:10px; left:10px; right:10px; padding:10px; display:grid; grid-template-columns:1fr 1fr; gap:5px; }
- .legend-item { font-size:.75rem; margin:0; }
- .legend-color { width:15px; height:15px; margin-right:6px; }
+  header {
+    min-height: 90px;
+    padding: .8rem 1rem;
+    flex-direction: column;
+    gap: .5rem;
+    text-align: center;
+  }
+
+  header h1 {
+    font-size: 1.2rem;
+  }
+
+  #map-container {
+    height: calc(100vh - 90px);
+    min-height: 400px;
+  }
+
+  .legend {
+    bottom: 10px;
+    left: 10px;
+    right: 10px;
+    padding: 10px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5px;
+  }
+
+  .legend-item {
+    font-size: .75rem;
+    margin: 0;
+  }
+
+  .legend-color {
+    width: 15px;
+    height: 15px;
+    margin-right: 6px;
+  }
 }
 </style>
 </head>
+
 <body>
-<header><h1>🌍 My World Travel Map</h1><a href="admin.html">Admin Panel</a></header>
+<header>
+  <h1>🌍 My World Travel Map</h1>
+  <a href="admin.html">Admin Panel</a>
+</header>
+
 <div id="map-container"></div>
 <div id="message"></div>
+
 <div class="legend">
- <div class="legend-item"><div class="legend-color" style="background:#2ECC71"></div>Visited</div>
- <div class="legend-item"><div class="legend-color" style="background:#2980B9"></div>Priority A</div>
- <div class="legend-item"><div class="legend-color" style="background:#3498DB"></div>Priority B</div>
- <div class="legend-item"><div class="legend-color" style="background:#85C1E9"></div>Priority C</div>
- <div class="legend-item"><div class="legend-color" style="background:#E74C3C"></div>Never Visit</div>
- <div class="legend-item"><div class="legend-color" style="background:#BDC3C7"></div>Unvisited</div>
+  <div class="legend-item"><div class="legend-color" style="background:#2ECC71"></div>Visited</div>
+  <div class="legend-item"><div class="legend-color" style="background:#2980B9"></div>Priority A</div>
+  <div class="legend-item"><div class="legend-color" style="background:#3498DB"></div>Priority B</div>
+  <div class="legend-item"><div class="legend-color" style="background:#85C1E9"></div>Priority C</div>
+  <div class="legend-item"><div class="legend-color" style="background:#E74C3C"></div>Never Visit</div>
+  <div class="legend-item"><div class="legend-color" style="background:#BDC3C7"></div>Unvisited</div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jsvectormap/1.7.0/js/jsvectormap.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jsvectormap/1.7.0/maps/world.js"></script>
 <script>
-const STATUS_COLORS = {
-  default: '#BDC3C7', visited: '#2ECC71', priority_a: '#2980B9',
-  priority_b: '#3498DB', priority_c: '#85C1E9', never: '#E74C3C'
-};
+const CDN_OPTIONS = [
+  {
+    core: 'https://cdn.jsdelivr.net/npm/jsvectormap@1.7.0/dist/jsvectormap.min.js',
+    world: 'https://cdn.jsdelivr.net/npm/jsvectormap@1.7.0/dist/maps/world.js',
+    css:  'https://cdn.jsdelivr.net/npm/jsvectormap@1.7.0/dist/jsvectormap.min.css'
+  },
+  {
+    core: 'https://unpkg.com/jsvectormap@1.7.0/dist/jsvectormap.min.js',
+    world: 'https://unpkg.com/jsvectormap@1.7.0/dist/maps/world.js',
+    css:  'https://unpkg.com/jsvectormap@1.7.0/dist/jsvectormap.min.css'
+  }
+];
 
 function showMessage(text) {
   const el = document.getElementById('message');
   el.textContent = text;
   el.style.display = 'block';
-  setTimeout(() => el.style.display = 'none', 5000);
 }
+
+function loadScript(url) {
+  return new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    script.src = url;
+    script.onload = resolve;
+    script.onerror = () => reject(new Error('Could not load ' + url));
+    document.head.appendChild(script);
+  });
+}
+
+function loadCSS(url) {
+  const link = document.getElementById('jsvectormap-css');
+  link.href = url;
+}
+
+async function loadMapLibrary() {
+  let lastError;
+
+  for (const cdn of CDN_OPTIONS) {
+    try {
+      if (typeof jsVectorMap === 'undefined') {
+        await loadScript(cdn.core);
+      }
+
+      if (!window.__worldMapLoaded) {
+        await loadScript(cdn.world);
+        window.__worldMapLoaded = true;
+      }
+
+      loadCSS(cdn.css);
+      return;
+    } catch (error) {
+      lastError = error;
+      window.__worldMapLoaded = false;
+    }
+  }
+
+  throw lastError || new Error('No map CDN could be loaded.');
+}
+
+const STATUS_COLORS = {
+  default: '#BDC3C7',
+  visited: '#2ECC71',
+  priority_a: '#2980B9',
+  priority_b: '#3498DB',
+  priority_c: '#85C1E9',
+  never: '#E74C3C'
+};
 
 function buildColorValues(data) {
   const values = {};
+
   if (data && data.countries) {
     Object.entries(data.countries).forEach(([code, status]) => {
       values[code] = STATUS_COLORS[status] || STATUS_COLORS.default;
     });
   }
+
   return values;
 }
 
 function createMap(data) {
   const colorValues = buildColorValues(data);
 
-  // This is the documented jsVectorMap approach: the map is created
-  // normally, then a region series supplies a direct fill colour for
-  // each country code.
-  const map = new jsVectorMap({
+  return new jsVectorMap({
     selector: '#map-container',
     map: 'world',
     backgroundColor: 'transparent',
+
     regionStyle: {
       initial: {
         fill: STATUS_COLORS.default,
@@ -80,61 +248,89 @@ function createMap(data) {
         stroke: '#ffffff',
         strokeWidth: 0.7
       },
-      hover: { fillOpacity: 0.85 }
+      hover: {
+        fillOpacity: 0.85
+      }
     },
+
     series: {
       regions: [{
         attribute: 'fill',
         values: colorValues
       }]
     },
+
     onRegionTooltipShow(event, tooltip, code) {
       tooltip.text(tooltip.text() + ' (' + code + ')');
     }
   });
-
-  return map;
 }
 
 async function getData() {
-  // GitHub Pages: data.json is in the same directory as index.html.
   try {
-    const response = await fetch('./data.json?v=' + Date.now(), { cache:'no-store' });
-    if (!response.ok) throw new Error('HTTP ' + response.status);
+    const response = await fetch('./data.json?v=' + Date.now(), {
+      cache: 'no-store'
+    });
+
+    if (!response.ok) {
+      throw new Error('HTTP ' + response.status);
+    }
+
     const data = await response.json();
-    if (!data || !data.countries) throw new Error('data.json has no countries object');
+
+    if (!data || !data.countries) {
+      throw new Error('data.json has no countries object');
+    }
+
     return data;
   } catch (error) {
     console.warn('data.json could not be loaded:', error);
+
     const local = localStorage.getItem('travelMapData');
+
     if (local) {
       try {
         const data = JSON.parse(local);
+
         if (data && data.countries) {
-          showMessage('Using the saved browser data because data.json could not be loaded.');
+          showMessage(
+            'Using the saved browser data because data.json could not be loaded.'
+          );
           return data;
         }
-      } catch (e) { console.warn('Invalid local data:', e); }
+      } catch (e) {
+        console.warn('Invalid local data:', e);
+      }
     }
-    showMessage('Map data could not be loaded. The map should still appear grey.');
-    return { countries:{} };
+
+    showMessage(
+      'Map data could not be loaded. The map should still appear grey.'
+    );
+
+    return { countries: {} };
   }
 }
 
-// Initialise only after both the core library and world map have loaded.
 (async function () {
-  if (typeof jsVectorMap === 'undefined') {
-    showMessage('jsVectorMap failed to load. Check your internet connection/CDN access.');
-    return;
-  }
   try {
+    await loadMapLibrary();
+
+    if (typeof jsVectorMap === 'undefined') {
+      throw new Error('jsVectorMap is not available.');
+    }
+
     const data = await getData();
     createMap(data);
+
   } catch (error) {
     console.error('Map initialisation failed:', error);
-    showMessage('Map initialisation failed. See the browser console for details.');
+
+    showMessage(
+      'The map library could not be loaded. Please check your internet connection or CDN access.'
+    );
   }
 })();
 </script>
+
 </body>
 </html>
