@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Travel Map</title>
-    <!-- jsVectorMap CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsvectormap/dist/css/jsvectormap.min.css" />
     <style>
         body { font-family: system-ui, -apple-system, sans-serif; margin: 0; background: #f4f7f6; color: #333; }
@@ -24,17 +23,15 @@
         .legend-item { display: flex; align-items: center; margin-bottom: 5px; font-size: 0.9rem; }
         .legend-color { width: 20px; height: 20px; border-radius: 4px; margin-right: 10px; border: 1px solid #ddd; }
 
-        /* --- MOBILE & TABLET ADJUSTMENTS --- */
         @media (max-width: 768px) {
             header { padding: 0.8rem 1rem; flex-direction: column; gap: 0.5rem; text-align: center; }
             header h1 { font-size: 1.2rem; }
             
-            /* Make legend smaller and stack it better on small screens */
             .legend { 
                 bottom: 10px; left: 10px; right: 10px; 
                 padding: 10px; 
                 display: grid; 
-                grid-template-columns: 1fr 1fr; /* 2 columns on mobile */
+                grid-template-columns: 1fr 1fr;
                 gap: 5px;
             }
             .legend-item { font-size: 0.75rem; margin-bottom: 0; }
@@ -62,12 +59,10 @@
     </div>
 </div>
 
-<!-- jsVectorMap JS -->
 <script src="https://cdn.jsdelivr.net/npm/jsvectormap/dist/js/jsvectormap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jsvectormap/dist/maps/world.js"></script>
 
 <script>
-    // Color mapping
     const STATUS_COLORS = {
         visited: '#2ECC71',
         priority_a: '#2980B9',
@@ -77,7 +72,6 @@
         default: '#BDC3C7'
     };
 
-    // Initialize Map
     const map = new jsVectorMap({
         selector: '#map-container',
         map: 'world',
@@ -91,37 +85,39 @@
         },
         regionClick: true,
         onRegionClick(event, code) {
-            // FUTURE FEATURE: City Highlighting
-            console.log(`Clicked country code: ${code}. Ready for city selection!`);
-            alert(`You clicked ${code}. In the future, this will open a city selector!`);
+            console.log(`Clicked country code: ${code}`);
+            alert(`You clicked ${code}. City selector coming soon!`);
         }
     });
 
-    // Load Data
     async function loadMapData() {
         try {
-            // Try to fetch from GitHub repo first
-            const response = await fetch('data.json');
+            console.log('Fetching data.json...');
+            const response = await fetch('data.json?v=' + new Date().getTime());
             if (!response.ok) throw new Error('No data.json found');
             const data = await response.json();
+            console.log('Data loaded:', data);
             applyColors(data);
         } catch (error) {
-            // Fallback to localStorage if file isn't found (e.g., local testing)
+            console.error('Error loading data:', error);
             const localData = localStorage.getItem('travelMapData');
             if (localData) {
+                console.log('Using localStorage fallback');
                 applyColors(JSON.parse(localData));
             }
         }
     }
 
     function applyColors(data) {
-        const regionStyle = {};
+        console.log('Applying colors for', Object.keys(data.countries).length, 'countries');
+        
         for (const [countryCode, status] of Object.entries(data.countries)) {
-            regionStyle[countryCode] = {
-                initial: { fill: STATUS_COLORS[status] || STATUS_COLORS.default }
-            };
+            const color = STATUS_COLORS[status] || STATUS_COLORS.default;
+            // Use the correct jsVectorMap method
+            map.setRegionStyle(countryCode, 'fill', color);
         }
-        map.updateRegions(regionStyle);
+        
+        console.log('Colors applied successfully!');
     }
 
     loadMapData();
