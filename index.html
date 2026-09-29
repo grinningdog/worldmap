@@ -72,55 +72,57 @@
         default: '#BDC3C7'
     };
 
-    const map = new jsVectorMap({
-        selector: '#map-container',
-        map: 'world',
-        backgroundColor: 'transparent',
-        regionStyle: {
-            initial: {
-                fill: STATUS_COLORS.default,
-                stroke: '#fff',
-                strokeWidth: 0.5
-            }
-        },
-        regionClick: true,
-        onRegionClick(event, code) {
-            console.log(`Clicked country code: ${code}`);
-            alert(`You clicked ${code}. City selector coming soon!`);
-        }
-    });
-
-    async function loadMapData() {
+    // Load data FIRST, then initialize map
+    async function initMap() {
+        let countryData = {};
+        
         try {
-            console.log('Fetching data.json...');
+            // Fetch with cache buster
             const response = await fetch('data.json?v=' + new Date().getTime());
             if (!response.ok) throw new Error('No data.json found');
             const data = await response.json();
-            console.log('Data loaded:', data);
-            applyColors(data);
+            countryData = data.countries || {};
         } catch (error) {
-            console.error('Error loading data:', error);
+            // Fallback to localStorage
             const localData = localStorage.getItem('travelMapData');
             if (localData) {
-                console.log('Using localStorage fallback');
-                applyColors(JSON.parse(localData));
+                const parsed = JSON.parse(localData);
+                countryData = parsed.countries || {};
             }
         }
-    }
 
-    function applyColors(data) {
-        console.log('Applying colors for', Object.keys(data.countries).length, 'countries');
-        
-        for (const [countryCode, status] of Object.entries(data.countries)) {
-            const color = STATUS_COLORS[status] || STATUS_COLORS.default;
-            // Use the correct jsVectorMap method
-            map.setRegionStyle(countryCode, 'fill', color);
+        // Build the regions array with colors
+        const regions = [];
+        for (const [code, status] of Object.entries(countryData)) {
+            regions.push({
+                name: code,
+                style: {
+                    fill: STATUS_COLORS[status] || STATUS_COLORS.default
+                }
+            });
         }
-        
-        console.log('Colors applied successfully!');
+
+        // Initialize map WITH the colors already set
+        const map = new jsVectorMap({
+            selector: '#map-container',
+            map: 'world',
+            backgroundColor: 'transparent',
+            regions: regions,
+            regionStyle: {
+                initial: {
+                    fill: STATUS_COLORS.default,
+                    stroke: '#fff',
+                    strokeWidth: 0.5
+                }
+            },
+            regionClick: true,
+            onRegionClick(event, code) {
+                alert(`You clicked ${code}. City selector coming soon!`);
+            }
+        });
     }
 
-    loadMapData();
+    initMap();
 </script>
 </body>
 </html>
