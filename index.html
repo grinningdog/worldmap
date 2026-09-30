@@ -2,26 +2,38 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
 <title>My World Travel Map</title>
 <style>
-*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;font-family:system-ui,-apple-system,sans-serif;background:#f4f7f6;color:#333;overflow:hidden}
-header{height:70px;background:#2c3e50;color:white;padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center}header h1{margin:0;font-size:1.5rem}header a{color:#fff;text-decoration:none;font-weight:bold}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;font-family:system-ui,-apple-system,sans-serif;background:#f4f7f6;color:#333}
+body{overflow:hidden}
+header{height:70px;background:#2c3e50;color:white;padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center}
+header h1{margin:0;font-size:1.5rem} header a{color:#fff;text-decoration:none;font-weight:bold}
 #map-container{height:calc(100vh - 70px);background:#e0e7ee;position:relative;overflow:hidden;touch-action:none}
-svg{width:100%;height:100%;display:block;cursor:grab}svg.dragging{cursor:grabbing}.country{stroke:#fff;stroke-width:.7;vector-effect:non-scaling-stroke;cursor:pointer;transition:opacity .12s}.country:hover{opacity:.78}
-#tooltip{position:absolute;display:none;background:#fff;color:#222;padding:7px 10px;border-radius:6px;box-shadow:0 2px 8px rgba(0,0,0,.25);font-size:13px;pointer-events:none;z-index:10;white-space:nowrap}
-#message{position:absolute;top:15px;left:50%;transform:translateX(-50%);background:#fff3cd;color:#664d03;padding:9px 14px;border-radius:6px;box-shadow:0 2px 6px rgba(0,0,0,.15);z-index:20;display:none}
-.controls{position:absolute;right:15px;top:15px;z-index:5;display:flex;flex-direction:column;gap:5px}.controls button{width:38px;height:38px;border:0;border-radius:6px;background:white;box-shadow:0 2px 5px rgba(0,0,0,.2);font-size:20px;cursor:pointer}.controls button:active{transform:scale(.96)}
-.legend{position:absolute;bottom:15px;left:15px;background:white;padding:12px 14px;border-radius:8px;box-shadow:0 3px 8px rgba(0,0,0,.18);z-index:5}.legend-item{display:flex;align-items:center;margin:4px 0;font-size:.85rem}.legend-color{width:18px;height:18px;border-radius:3px;margin-right:8px;border:1px solid #ddd}
-@media(max-width:768px){header{height:90px;padding:.7rem 1rem;flex-direction:column;gap:.25rem;justify-content:center}header h1{font-size:1.15rem}#map-container{height:calc(100vh - 90px)}.legend{bottom:10px;left:10px;padding:8px 10px;display:grid;grid-template-columns:1fr 1fr;gap:2px 10px}.legend-item{font-size:.72rem;margin:2px 0}.legend-color{width:14px;height:14px;margin-right:5px}}
+svg{width:100%;height:100%;display:block;cursor:grab}svg.dragging{cursor:grabbing}
+.country{stroke:#fff;stroke-width:.7;vector-effect:non-scaling-stroke;cursor:pointer}.country:hover{opacity:.78}
+#tooltip{position:absolute;display:none;background:#fff;color:#222;padding:7px 10px;border-radius:6px;box-shadow:0 2px 8px rgba(0,0,0,.25);font-size:13px;pointer-events:none;z-index:20;white-space:nowrap}
+#message{position:absolute;top:15px;left:50%;transform:translateX(-50%);background:#fff3cd;color:#664d03;padding:9px 14px;border-radius:6px;box-shadow:0 2px 6px rgba(0,0,0,.15);z-index:30;display:none}
+.controls{position:absolute;right:15px;top:15px;z-index:10;display:flex;flex-direction:column;gap:5px}.controls button{width:40px;height:40px;border:0;border-radius:7px;background:white;box-shadow:0 2px 5px rgba(0,0,0,.2);font-size:21px;cursor:pointer}.controls button:active{transform:scale(.96)}
+.legend{position:absolute;bottom:15px;left:15px;background:white;padding:12px 14px;border-radius:8px;box-shadow:0 3px 8px rgba(0,0,0,.18);z-index:10}.legend-item{display:flex;align-items:center;margin:4px 0;font-size:.85rem}.legend-color{width:18px;height:18px;border-radius:3px;margin-right:8px;border:1px solid #ddd}
+.legend-toggle{display:none;position:absolute;bottom:12px;left:12px;z-index:12;border:0;border-radius:8px;background:#fff;padding:9px 12px;box-shadow:0 3px 8px rgba(0,0,0,.2);font-weight:700}
+@media(max-width:768px){
+ body{overflow:auto}header{height:72px;padding:.65rem 1rem}header h1{font-size:1.12rem}header a{font-size:.9rem}
+ #map-container{height:min(62vh,56vw);min-height:210px;max-height:460px}
+ .legend{display:none}.legend.open{display:block;bottom:58px;left:10px;padding:9px 11px}.legend-item{font-size:.78rem;margin:3px 0}.legend-color{width:15px;height:15px;margin-right:6px}.legend-toggle{display:block}
+ .controls{right:10px;top:10px}.controls button{width:40px;height:40px}
+}
+@media(min-width:769px) and (max-width:1100px){#map-container{height:calc(100vh - 70px)}}
 </style>
 </head>
 <body>
 <header><h1>🌍 My World Travel Map</h1><a href="admin.html">Admin Panel</a></header>
 <div id="map-container">
  <div id="message"></div><div id="tooltip"></div>
- <div class="controls"><button id="zoomIn" aria-label="Zoom in">+</button><button id="zoomOut" aria-label="Zoom out">−</button><button id="reset" aria-label="Reset">⌂</button></div>
- <div class="legend">
+ <div class="controls"><button id="zoomIn" aria-label="Zoom in">+</button><button id="zoomOut" aria-label="Zoom out">−</button><button id="reset" aria-label="Reset map">⌂</button></div>
+ <button class="legend-toggle" id="legendToggle">ⓘ Legend</button>
+ <div class="legend" id="legend">
   <div class="legend-item"><div class="legend-color" style="background:#2ECC71"></div>Visited</div>
   <div class="legend-item"><div class="legend-color" style="background:#2980B9"></div>Priority A</div>
   <div class="legend-item"><div class="legend-color" style="background:#3498DB"></div>Priority B</div>
@@ -33,29 +45,41 @@ svg{width:100%;height:100%;display:block;cursor:grab}svg.dragging{cursor:grabbin
 <script>
 const COLORS={default:'#BDC3C7',visited:'#2ECC71',priority_a:'#2980B9',priority_b:'#3498DB',priority_c:'#85C1E9',never:'#E74C3C'};
 const STATUS_NAMES={default:'Unvisited',visited:'Visited',priority_a:'Priority A',priority_b:'Priority B',priority_c:'Priority C',never:'Never Visit'};
-const container=document.getElementById('map-container'), tooltip=document.getElementById('tooltip'), message=document.getElementById('message');
-let mapData={countries:{}};
-let worldData=null, svg=null, group=null, scale=1, tx=0, ty=0, dragging=false, sx=0, sy=0, stx=0, sty=0;
+const container=document.getElementById('map-container'),tooltip=document.getElementById('tooltip'),message=document.getElementById('message');
+let mapData={countries:{}},worldData=null,svg=null,group=null,scale=1,tx=0,ty=0,dragging=false,sx=0,sy=0,stx=0,sty=0,pointers=new Map(),pinchStartDistance=0,pinchStartScale=1,pinchMid={x:0,y:0};
 function showMessage(t){message.textContent=t;message.style.display='block'}
 function hideMessage(){message.style.display='none'}
-function statusFor(code){return mapData.countries && mapData.countries[code] || 'default'}
-function fit(){if(!svg||!worldData)return;const w=container.clientWidth,h=container.clientHeight;const sx=w/worldData.width,sy=h/worldData.height;scale=Math.min(sx,sy)*.94;tx=(w-worldData.width*scale)/2;ty=(h-worldData.height*scale)/2;applyTransform()}
+function statusFor(code){return mapData.countries&&mapData.countries[code]||'default'}
+function fit(){if(!svg||!worldData)return;const w=container.clientWidth,h=container.clientHeight,sx=w/worldData.width,sy=h/worldData.height;scale=Math.min(sx,sy)*.94;tx=(w-worldData.width*scale)/2;ty=(h-worldData.height*scale)/2;applyTransform()}
 function applyTransform(){if(group)group.setAttribute('transform',`translate(${tx} ${ty}) scale(${scale})`)}
-function zoom(f,cx=container.clientWidth/2,cy=container.clientHeight/2){const ns=Math.max(.55,Math.min(8,scale*f));const k=ns/scale;tx=cx-k*(cx-tx);ty=cy-k*(cy-ty);scale=ns;applyTransform()}
+function zoom(f,cx=container.clientWidth/2,cy=container.clientHeight/2){const ns=Math.max(.55,Math.min(8,scale*f)),k=ns/scale;tx=cx-k*(cx-tx);ty=cy-k*(cy-ty);scale=ns;applyTransform()}
 function makeMap(){
- svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('width','100%');svg.setAttribute('height','100%');
+ svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('width','100%');svg.setAttribute('height','100%');svg.setAttribute('aria-label','World travel map');
  group=document.createElementNS('http://www.w3.org/2000/svg','g');svg.appendChild(group);container.appendChild(svg);
- Object.entries(worldData.paths).forEach(([code,p])=>{const path=document.createElementNS('http://www.w3.org/2000/svg','path');path.setAttribute('d',p.path);path.setAttribute('class','country');path.dataset.code=code;path.dataset.name=p.name||code;path.setAttribute('fill',COLORS[statusFor(code)]||COLORS.default);path.addEventListener('mouseenter',()=>{tooltip.textContent=`${p.name||code} (${code}) — ${STATUS_NAMES[statusFor(code)]||'Unvisited'}`;tooltip.style.display='block'});path.addEventListener('mousemove',e=>{const r=container.getBoundingClientRect();tooltip.style.left=(e.clientX-r.left+12)+'px';tooltip.style.top=(e.clientY-r.top+12)+'px'});path.addEventListener('mouseleave',()=>tooltip.style.display='none');group.appendChild(path)});
- fit();
+ Object.entries(worldData.paths).forEach(([code,p])=>{const path=document.createElementNS('http://www.w3.org/2000/svg','path');path.setAttribute('d',p.path);path.setAttribute('class','country');path.dataset.code=code;path.dataset.name=p.name||code;path.setAttribute('fill',COLORS[statusFor(code)]||COLORS.default);
+ path.addEventListener('mouseenter',()=>{if(!matchMedia('(pointer:fine)').matches)return;tooltip.textContent=`${p.name||code} (${code}) — ${STATUS_NAMES[statusFor(code)]||'Unvisited'}`;tooltip.style.display='block'});
+ path.addEventListener('mousemove',e=>{if(!matchMedia('(pointer:fine)').matches)return;const r=container.getBoundingClientRect();tooltip.style.left=(e.clientX-r.left+12)+'px';tooltip.style.top=(e.clientY-r.top+12)+'px'});
+ path.addEventListener('mouseleave',()=>tooltip.style.display='none');group.appendChild(path)});fit()
 }
 function refreshColors(){if(!group)return;group.querySelectorAll('.country').forEach(p=>p.setAttribute('fill',COLORS[statusFor(p.dataset.code)]||COLORS.default))}
-async function load(){
- try{const [wr,dr]=await Promise.all([fetch('./world-data.json?v='+Date.now(),{cache:'no-store'}),fetch('./data.json?v='+Date.now(),{cache:'no-store'})]);if(!wr.ok)throw new Error('world-data.json HTTP '+wr.status);if(!dr.ok)throw new Error('data.json HTTP '+dr.status);worldData=await wr.json();mapData=await dr.json();if(!mapData.countries)mapData={countries:{}};makeMap();hideMessage()}catch(e){console.error(e);showMessage('Map could not be loaded: '+e.message)}}
-document.getElementById('zoomIn').onclick=()=>zoom(1.3);document.getElementById('zoomOut').onclick=()=>zoom(1/1.3);document.getElementById('reset').onclick=fit;
+async function load(){try{const [wr,dr]=await Promise.all([fetch('./world-data.json?v='+Date.now(),{cache:'no-store'}),fetch('./data.json?v='+Date.now(),{cache:'no-store'})]);if(!wr.ok)throw new Error('world-data.json HTTP '+wr.status);if(!dr.ok)throw new Error('data.json HTTP '+dr.status);worldData=await wr.json();mapData=await dr.json();if(!mapData.countries)mapData={countries:{}};makeMap();hideMessage()}catch(e){console.error(e);showMessage('Map could not be loaded: '+e.message)}}
+function pointerDistance(a,b){return Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY)}
+function pointerMid(a,b){const r=container.getBoundingClientRect();return{x:(a.clientX+b.clientX)/2-r.left,y:(a.clientY+b.clientY)/2-r.top}}
+container.addEventListener('pointerdown',e=>{if(e.target.closest('.controls,.legend,.legend-toggle,#tooltip'))return;pointers.set(e.pointerId,e);try{container.setPointerCapture(e.pointerId)}catch(_){}
+ if(pointers.size===1){dragging=true;sx=e.clientX;sy=e.clientY;stx=tx;sty=ty;svg&&svg.classList.add('dragging')}
+ if(pointers.size===2){dragging=false;const a=[...pointers.values()];pinchStartDistance=pointerDistance(a[0],a[1]);pinchStartScale=scale;pinchMid=pointerMid(a[0],a[1]);svg&&svg.classList.remove('dragging')}
+});
+container.addEventListener('pointermove',e=>{if(!pointers.has(e.pointerId))return;pointers.set(e.pointerId,e);
+ if(pointers.size>=2){const a=[...pointers.values()];const d=pointerDistance(a[0],a[1]);if(pinchStartDistance>0){const ns=Math.max(.55,Math.min(8,pinchStartScale*(d/pinchStartDistance)));const k=ns/scale;tx=pinchMid.x-k*(pinchMid.x-tx);ty=pinchMid.y-k*(pinchMid.y-ty);scale=ns;applyTransform()}return}
+ if(dragging){tx=stx+(e.clientX-sx);ty=sty+(e.clientY-sy);applyTransform()}
+});
+function endPointer(e){pointers.delete(e.pointerId);if(pointers.size<2)pinchStartDistance=0;if(pointers.size===0){dragging=false;svg&&svg.classList.remove('dragging')}else if(pointers.size===1){const p=[...pointers.values()][0];dragging=true;sx=p.clientX;sy=p.clientY;stx=tx;sty=ty}}
+container.addEventListener('pointerup',endPointer);container.addEventListener('pointercancel',endPointer);container.addEventListener('pointerleave',()=>{tooltip.style.display='none'});
 container.addEventListener('wheel',e=>{e.preventDefault();const r=container.getBoundingClientRect();zoom(e.deltaY<0?1.15:1/1.15,e.clientX-r.left,e.clientY-r.top)},{passive:false});
-container.addEventListener('pointerdown',e=>{if(e.target.closest('.controls,.legend,#tooltip'))return;dragging=true;sx=e.clientX;sy=e.clientY;stx=tx;sty=ty;svg.classList.add('dragging');container.setPointerCapture(e.pointerId)});
-container.addEventListener('pointermove',e=>{if(!dragging)return;tx=stx+(e.clientX-sx);ty=sty+(e.clientY-sy);applyTransform()});container.addEventListener('pointerup',e=>{dragging=false;if(svg)svg.classList.remove('dragging')});container.addEventListener('pointercancel',()=>{dragging=false;if(svg)svg.classList.remove('dragging')});window.addEventListener('resize',()=>{if(svg)fit()});
-load();
+document.getElementById('zoomIn').onclick=()=>zoom(1.3);document.getElementById('zoomOut').onclick=()=>zoom(1/1.3);document.getElementById('reset').onclick=fit;
+document.getElementById('legendToggle').onclick=()=>document.getElementById('legend').classList.toggle('open');
+container.addEventListener('click',e=>{if(e.target.closest('.legend-toggle')||e.target.closest('.legend'))return;document.getElementById('legend').classList.remove('open')});
+window.addEventListener('resize',()=>{if(svg)fit()});load();
 </script>
 </body>
 </html>
